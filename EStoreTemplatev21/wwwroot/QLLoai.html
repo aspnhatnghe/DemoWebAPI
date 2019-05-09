@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>QUẢN LÝ LOẠI</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Hình</th>
+                    <!--<th>Mô tả</th>-->
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tblLoai"></tbody>
+        </table>
+        <input type="button" value="Thêm" id="btnThem" />
+    </div>
+    <script>
+        $(function () {
+            $("#btnThem").click(function () {
+                //lấy dữ liệu từ UI
+                var loai = new Object();
+                loai.maLoai = 0;
+                loai.tenLoai = "Demo";
+                loai.moTa = "Mô tả";
+                loai.hinh = "N/A";
+                $.ajax({
+                    url: "/api/Loai",
+                    type: "POST",
+                    data: JSON.stringify(loai),
+                    dataType: 'json',
+                    success: function (lo) {
+                        alert("Vừa thêm loại: " + lo.maLoai)
+                    },
+                    error: function (xhr, opt, mess) {
+                        alert(xhr);
+                    }
+                });
+            });
+
+            //load tất cả loại
+            $.ajax({
+                url: "/api/Loai",
+                success: function (data) {
+                    $(data).each(function (idx, item) {
+                        var tr = $("<tr/>");
+                        $("<td/>").html(item.maLoai).appendTo(tr);
+                        $("<td/>").html(item.tenLoai).appendTo(tr);
+                        $("<td/>").html(item.hinh).appendTo(tr);
+                        //$("<td/>").html(item.moTa).appendTo(tr);
+                        $("<td/>").html("<input type=button class=btnXoa data-loai=" + item.maLoai + " value=Xóa />").appendTo(tr);
+                        $("#tblLoai").append(tr);
+                    });
+
+                    $(".btnXoa").click(function () {
+                        var ma = $(this).attr("data-loai");
+                        var dongChon = $(this).closest("tr");
+                        if (confirm("Chắc xóa loại: " + ma)) {
+                            //alert("Xóa đi");
+                            $.ajax({
+                                url: "/api/Loai/" + ma,
+                                type: "DELETE",
+                                success: function () {
+                                    alert("Thành công");
+                                    dongChon.remove();
+                                },
+                                error: function (res) {
+                                    alert("Lỗi : " + res);
+                                }
+                            });
+                        }
+                    });
+                }
+            });//end ajax
+
+
+        });//ready
+    </script>
+</body>
+</html>
